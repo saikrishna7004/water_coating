@@ -1,5 +1,4 @@
 flask
 sklearn
 PyPDF2
-glob
 spacy
