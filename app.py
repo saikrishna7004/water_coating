@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request
 import PyPDF2
 import os
-import uuid
 import main
 
 app = Flask(__name__)

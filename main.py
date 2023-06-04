@@ -1,5 +1,3 @@
-from sklearn.linear_model import LogisticRegression
-from sklearn.feature_extraction.text import CountVectorizer
 import re
 import PyPDF2
 import glob
