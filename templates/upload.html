@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Upload PDF Files</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container my-4">
+        <h1 class="mb-3">Upload PDF Files</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="my-3">
+                <label for="pdf_files" class="form-label">Multiple files input example</label>
+                <input class="form-control" type="file" name="pdf_files" id="pdf_files" multiple>
+            </div>
+            <div class="my-3">
+                <label for="pdf_files" class="form-label">Filter values</label>
+                <div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="select_all">
+                        <label class="form-check-label" for="select_all">Select All</label>
+                    </div>
+                    {% for d in data %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="{{d}}" id="{{d}}" name="checked_keys">
+                        <label class="form-check-label" for="{{d}}">{{d}}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById("select_all").addEventListener("change", function () {
+            var checkboxes = document.getElementsByName("checked_keys");
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = this.checked;
+            }
+        })
+    </script>
+</body>
+
+</html>
