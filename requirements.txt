@@ -1,5 +1,5 @@
 flask
-sklearn
 PyPDF2
 spacy
 gunicorn
+scikit-learn
