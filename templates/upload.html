@@ -2,44 +2,201 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload PDF Files</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .person-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .form-check-label {
+            font-weight: normal;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+        .btn-primary:focus,
+        .btn-primary.focus {
+            box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
+        }
+    </style>
 </head>
 
 <body>
     <div class="container my-4">
-        <h1 class="mb-3">Upload PDF Files</h1>
-        <form method="POST" enctype="multipart/form-data">
-            <div class="my-3">
-                <label for="pdf_files" class="form-label">Multiple files input example</label>
-                <input class="form-control" type="file" name="pdf_files" id="pdf_files" multiple>
-            </div>
-            <div class="my-3">
-                <label for="pdf_files" class="form-label">Filter values</label>
-                <div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="select_all">
-                        <label class="form-check-label" for="select_all">Select All</label>
-                    </div>
-                    {% for d in data %}
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="{{d}}" id="{{d}}" name="checked_keys">
-                        <label class="form-check-label" for="{{d}}">{{d}}</label>
-                    </div>
-                    {% endfor %}
+        <h1>Upload PDF Files</h1>
+        <div class="text-center">
+            <img src="/static/person.jpg" alt="Person" class="person-image">
+        </div>
+        <div class="mb-3">
+            <label for="pdf_files" class="form-label">Multiple files input example</label>
+            <input class="form-control" type="file" name="pdf_files" id="pdf_files" multiple>
+        </div>
+        <div class="mb-3">
+            <label for="pdf_files" class="form-label">Filter values</label>
+            <div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="select_all">
+                    <label class="form-check-label" for="select_all">Select All</label>
+                </div>
+                {% for d in data %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="{{d}}" id="{{d}}" name="checked_keys">
+                    <label class="form-check-label" for="{{d}}">{{d}}</label>
+                </div>
+                {% endfor %}
+                <div class="mb-3">
+                    <label for="additional_tags" class="form-label">Additional Filter Tags</label>
+                    <input class="form-control" type="text" name="additional_tags" id="additional_tags">
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+        </div>
+        <button type="button" class="btn btn-primary" id="fetch-data-btn">Submit</button>
     </div>
+    <div class="container mb-5" style="overflow-x: auto;">
+        <label for="pdf_files" class="form-label">Output</label>
+        <div id="table-container">Please upload files, select parameters and then see the output.</div>
+    </div>
+
     <script>
-        document.getElementById("select_all").addEventListener("change", function () {
-            var checkboxes = document.getElementsByName("checked_keys");
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = this.checked;
+        // Fetch JSON data and render the table
+        document.getElementById("fetch-data-btn").addEventListener("click", function () {
+            var checkboxes = document.querySelectorAll('input[name="checked_keys"]:checked');
+            var selectedKeys = [];
+
+            checkboxes.forEach(function (checkbox) {
+                selectedKeys.push(checkbox.value);
+            });
+
+            console.log("Keys", selectedKeys)
+
+            // Prepare the form data for file upload
+            var formData = new FormData();
+            var files = document.getElementById("pdf_files").files;
+            for (var i = 0; i < files.length; i++) {
+                formData.append("pdf_files", files[i]);
             }
-        })
+            for (const key of selectedKeys) {
+                formData.append("checked_keys", key);
+            }
+
+            // Get the additional filter tags value
+            const additionalTagsInput = document.getElementById("additional_tags");
+            formData.append("additional_tags", additionalTagsInput.value);
+
+            // Send the data via a POST request
+            fetch('/', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+
+                    // Display table based on data
+                    var tableContainer = document.getElementById('table-container');
+                    tableContainer.innerHTML = ''; // Clear existing table
+
+                    var table = document.createElement('table');
+                    table.classList.add('table', 'table-striped');
+                    var tableHeader = document.createElement('thead');
+                    var tableBody = document.createElement('tbody');
+
+                    // Create table header
+                    var headerRow = document.createElement('tr');
+                    headerRow.innerHTML = '<th>Filename</th>' + Object.keys(data[Object.keys(data)[0]]).map(function (columnHeading) {
+                        return '<th>' + columnHeading + '</th>';
+                    }).join('');
+                    tableHeader.appendChild(headerRow);
+                    table.appendChild(tableHeader);
+
+                    // Create table rows
+                    Object.keys(data).forEach(function (filename) {
+                        var rowData = data[filename];
+                        var row = document.createElement('tr');
+                        row.innerHTML = '<td>' + filename + '</td>' + Object.values(rowData).map(function (value) {
+                            return '<td>' + (value ? value : '-') + '</td>';
+                        }).join('');
+                        tableBody.appendChild(row);
+                    });
+                    table.appendChild(tableBody);
+                    tableContainer.appendChild(table);
+
+                    var csvContent = 'data:text/csv;charset=utf-8,';
+
+                    // Add the table header to the CSV
+                    var headerRow = ['Filename'].concat(Object.keys(data[Object.keys(data)[0]]));
+                    csvContent += headerRow.join(',') + '\r\n';
+
+                    // Add the table rows to the CSV
+                    Object.keys(data).forEach(function (filename) {
+                        var rowData = data[filename];
+                        var row = [filename].concat(Object.values(rowData));
+                        csvContent += row.join(',') + '\r\n';
+                    });
+
+                    // Create a data URI for the CSV content
+                    var encodedUri = encodeURI(csvContent);
+
+                    // Create a link element for the download
+                    var link = document.createElement('a');
+                    link.setAttribute('href', encodedUri);
+                    link.setAttribute('download', 'table.csv');
+                    link.setAttribute('class', 'btn btn-primary');
+                    link.innerHTML = 'Download'
+                    tableContainer.appendChild(link);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+        });
+
+        document.getElementById("select_all").addEventListener("change", function () {
+            const checkboxes = document.querySelectorAll('input[name="checked_keys"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
     </script>
 </body>
 

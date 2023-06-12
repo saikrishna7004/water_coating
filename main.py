@@ -40,7 +40,7 @@ def extract_value(text, pattern, extra=None):
     return None
 
 
-def extract_data_from_pdf(reader):
+def extract_data_from_pdf(reader, packaging_content=False, extra_tags=''):
     page_content = reader.pages[0].extract_text()
     page_content_2 = reader.pages[1].extract_text()
 
@@ -66,7 +66,10 @@ def extract_data_from_pdf(reader):
         page_content, r'Elongation at break\s+(.*)')
     flexibility = extract_value(page_content, r'Flexibility[^%]*%\s+(.*)')
     hardness = extract_value(page_content, r'Hardness\s+(.*)')
-    packaging_content = detect_matching_sentence(page_content_2)
+    if packaging_content:
+        packaging_content = detect_matching_sentence(page_content_2)
+    else:
+        packaging_content = ['']
 
     data = {
         'Pot life': pot_life,
@@ -84,6 +87,14 @@ def extract_data_from_pdf(reader):
         'Hardness': hardness,
         'Packaging': packaging_content[0]
     }
+
+    extra_tags = extra_tags.split(', ')
+    if extra_tags!=['']:
+        for tag in extra_tags:
+            # print(tag)
+            data[tag] = extract_value(page_content, fr'{tag}[^%]*%\s+(.*)')
+    
+    print(data)
 
     return data
 
